@@ -66,9 +66,6 @@ class Sound(object):
 
     def __del__(self):
         self.stop()
-        while not self.stopped():
-            time.sleep(0.5)
-
         self.stream.close()
 
     def get_file_path(self):
