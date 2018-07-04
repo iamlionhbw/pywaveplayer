@@ -30,15 +30,12 @@ class _AudioMgr(object):
     def make_stream(self, params):
         if self.audio is None:
             raise RuntimeError("Cannot hold a PyAudio instance")
-        if isinstance(params, wave._wave_params):
-            return self.audio.open(
-                format=self.audio.get_format_from_width(params.sampwidth),
-                channels=params.nchannels,
-                rate=params.framerate,
-                output=True
-            )
-        else:
-            raise ValueError("Need wave._wave_params, but get type:%s" % type(params))
+        return self.audio.open(
+            format=self.audio.get_format_from_width(params.sampwidth),
+            channels=params.nchannels,
+            rate=params.framerate,
+            output=True
+        )
 
     def __del__(self):
         if self.audio is not None:
