@@ -53,13 +53,14 @@ class Sound(object):
         self.fp = file_path
 
         self.wave_file = wave.open(self.fp, "rb")
-
         self.wave_params = self.wave_file.getparams()
-
         self.stream = _AudioMgr().make_stream(self.wave_params)
 
         self._stop_play_flag = True
         self._is_stopped = True
+
+        # reset to start
+        self._reset = False
 
     def __del__(self):
         self.stop()
@@ -73,14 +74,16 @@ class Sound(object):
             time.sleep(delay)
         self._stop_play_flag = False
         self._is_stopped = False
-        while loops and not self._stop_play_flag:
+        self._reset = False
+        while loops and not self._stop_play_flag and not self._reset:
             loops -= 1
             data = self.wave_file.readframes(chunk_size)
-            while len(data) > 0 and not self._stop_play_flag:
+            while len(data) > 0 and not self._stop_play_flag and not self._reset:
                 self.stream.write(data)
                 data = self.wave_file.readframes(chunk_size)
             self.wave_file.rewind()
         self._is_stopped = True
+        self._reset = False
 
     def play_background(self, loops=1, chunk_size=1024, delay=0):
         threading.Thread(
@@ -91,6 +94,10 @@ class Sound(object):
     @staticmethod
     def _background_thread(self, loops, chunk_size, delay):
         self.play(loops, chunk_size, delay)
+
+    def reset(self):
+        self._reset = True
+        self.wave_file.rewind()
 
     def stop(self):
         self._stop_play_flag = True
